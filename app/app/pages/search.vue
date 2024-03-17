@@ -1,33 +1,32 @@
 <template>
   <div class="search_content_wrapper">
     <div class="search_target">
-      <p class="keyword">検索結果が表示される</p>
+      <p class="keyword">
+        {{
+          keyword
+            ? `「${keyword}」の検索結果`
+            : "キーワードが指定されておりません"
+        }}
+      </p>
     </div>
     <div class="search_result">
-      <div class="serch_result_content flex">
+      <div
+        v-for="(i, index) in data"
+        :key="index"
+        class="serch_result_content flex"
+      >
         <div class="content_left">
           <p class="circle">写真</p>
         </div>
         <div class="content_right">
-          <p class="post_user_name">@kenny</p>
-          <time class="post_date">2023年07月7日</time>
-          <!-- <nuxt-link :to="/"> -->
-          <h3 class="post_title">記事のタイトル</h3>
-          <!-- </nuxt-link> -->
-          <p><font-awesome-icon :icon="['fas', 'tag']" />タグ</p>
-          <p>いいね数</p>
-        </div>
-      </div>
-      <div class="serch_result_content flex">
-        <div class="content_left">
-          <p class="circle">写真</p>
-        </div>
-        <div class="content_right">
-          <p class="post_user_name">@kenny</p>
-          <time class="post_date">2023年07月7日</time>
-          <!-- <nuxt-link :to="/"> -->
-          <h3 class="post_title">記事のタイトル</h3>
-          <!-- </nuxt-link> -->
+          <p class="post_user_name">@{{ i.user.name }}</p>
+          <time class="post_date">{{ i.formatted_created_at }}</time>
+          <nuxt-link :to="`/post/${i.id}`">
+            <h3
+              class="post_title"
+              v-html="highlightKeyword(i.title, keyword)"
+            ></h3>
+          </nuxt-link>
           <p><font-awesome-icon :icon="['fas', 'tag']" />タグ</p>
           <p>いいね数</p>
         </div>
@@ -37,7 +36,46 @@
 </template>
 
 <script>
-export default {};
+export default {
+  async asyncData({ $axios, query }) {
+    const keyword = query.q;
+    try {
+      const response = await $axios.get(
+        "http://localhost:3001/api/v1/posts/search",
+        {
+          params: {
+            keyword: keyword,
+          },
+        }
+      );
+      return {
+        data: response.data,
+        keyword: keyword,
+      };
+    } catch (error) {
+      console.error("APIリクエストでエラーが発生しました:", error);
+      return { data: [] };
+    }
+  },
+  watchQuery: ["q"],
+  methods: {
+    highlightKeyword(title, keyword) {
+      if (!keyword.trim()) {
+        return title;
+      }
+      // RegExp.escape関数がないため、正規表現で使用される特殊文字をエスケープします。
+      const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(`(${escapedKeyword})`, "gi");
+      return title.replace(regex, '<span class="highlight">$1</span>');
+    },
+  },
+  data() {
+    return {
+      data: [],
+      keyword: "",
+    };
+  },
+};
 </script>
 
 <style>
@@ -53,27 +91,27 @@ export default {};
   border-radius: 10px;
   display: flex;
   align-items: center;
-  /* height: 100px; */
-  /* font-size: 1.2rem;*/
   line-height: 1.5;
-  /* line-height: 2; */
 }
 
 .search_target > .keyword {
-  /* margin: 15px 0 0 0; */
   font-size: 1.2rem;
-  /* line-height: 2; */
 }
 
 .search_result {
   background-color: #ffffff;
   border-radius: 10px;
   padding: 15px 0;
+  margin-bottom: 20px;
 }
 
 .serch_result_content {
-  /* margin-top: 15px; */
   border-top: 1px solid black;
   padding: 5px;
+}
+
+.highlight {
+  background-color: yellow;
+  font-weight: bold;
 }
 </style>

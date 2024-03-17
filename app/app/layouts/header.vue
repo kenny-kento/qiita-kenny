@@ -13,6 +13,8 @@
               type="search"
               class="content_search"
               placeholder="記事を検索"
+              v-model="keyword"
+              @keyup.enter="searchArticles"
             />
           </li>
           <li>
@@ -60,8 +62,10 @@
 
 <script>
 export default {
-  data() {
-    return {};
+  data: function () {
+    return {
+      keyword: "",
+    };
   },
   async mounted() {
     await this.$store.dispatch("user/fetchUser");
@@ -82,6 +86,9 @@ export default {
 
         this.$router.push("/");
       });
+    },
+    searchArticles() {
+      this.$router.push({ path: "/search", query: { q: this.keyword } });
     },
   },
 };
