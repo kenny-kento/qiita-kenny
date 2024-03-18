@@ -44,13 +44,14 @@ class Api::V1::PostsController < ApplicationController
 
     # NOTE:アーキテクチャ変更や機能が複雑化し複数のモデル間での検索機能として独立させたい場合は別途コントローラーを切り出す予定
     def search
-        if params[:keyword].present?
-            searched_posts = Post.where('title LIKE ?', "%#{params[:keyword]}%").includes(:user)
-            render json: searched_posts.as_json(include: { user: { only: [:id, :name, :image] } },methods: :formatted_created_at)
-        else
-            searched_posts = Post.includes(:user)
-            render json: searched_posts.as_json(include: { user: { only: [:id, :name, :image] } },methods: :formatted_created_at)
-        end
+        searched_posts = if params[:keyword].present?
+                            Post.where('title LIKE ?', "%" + Post.sanitize_sql_like(params[:keyword]) + "%")
+                         else  
+                            Post.all
+                         end
+        
+        searched_posts = searched_posts.includes(:user)
+        render json: searched_posts.as_json(include: { user: { only: [:id, :name, :image] } },methods: :formatted_created_at)
     end
 
 

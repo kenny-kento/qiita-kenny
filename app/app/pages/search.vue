@@ -9,7 +9,7 @@
         }}
       </p>
     </div>
-    <div class="search_result">
+    <div v-if="data.length" class="search_result">
       <div
         v-for="(i, index) in data"
         :key="index"
@@ -31,6 +31,9 @@
           <p>いいね数</p>
         </div>
       </div>
+    </div>
+    <div v-else class="search_result">
+      <p>検索キーワードを含む記事がヒットしませんでした</p>
     </div>
   </div>
 </template>
