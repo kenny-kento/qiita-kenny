@@ -84,6 +84,7 @@ export default {
         localStorage.removeItem("token-type");
         localStorage.removeItem("authorization");
 
+        this.$store.dispatch("user/clearUser");
         this.$router.push("/");
       });
     },

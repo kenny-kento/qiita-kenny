@@ -1,4 +1,5 @@
 import * as FontAwesome from "./build/fontawesome";
+require("dotenv").config();
 
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
@@ -84,5 +85,8 @@ export default {
         },
       },
     },
+  },
+  env: {
+    baseUrl: process.env.BASE_URL,
   },
 };

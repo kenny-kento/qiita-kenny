@@ -11,20 +11,20 @@
     </div>
     <div v-if="data.length" class="search_result">
       <div
-        v-for="(i, index) in data"
-        :key="index"
+        v-for="post in data"
+        :key="post.id"
         class="serch_result_content flex"
       >
         <div class="content_left">
           <p class="circle">写真</p>
         </div>
         <div class="content_right">
-          <p class="post_user_name">@{{ i.user.name }}</p>
-          <time class="post_date">{{ i.formatted_created_at }}</time>
-          <nuxt-link :to="`/post/${i.id}`">
+          <p class="post_user_name">@{{ post.user.name }}</p>
+          <time class="post_date">{{ post.formatted_created_at }}</time>
+          <nuxt-link :to="`/post/${post.id}`">
             <h3
               class="post_title"
-              v-html="highlightKeyword(i.title, keyword)"
+              v-html="highlightKeyword(post.title, keyword)"
             ></h3>
           </nuxt-link>
           <p><font-awesome-icon :icon="['fas', 'tag']" />タグ</p>
@@ -44,7 +44,7 @@ export default {
     const keyword = query.q;
     try {
       const response = await $axios.get(
-        "http://localhost:3001/api/v1/posts/search",
+        `${process.env.baseUrl}/api/v1/posts/search`,
         {
           params: {
             keyword: keyword,

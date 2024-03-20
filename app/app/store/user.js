@@ -22,7 +22,7 @@ export const actions = {
   async fetchUser({ commit }) {
     try {
       const response = await this.$axios.$get(
-        `http://localhost:3001/api/v1/users/show_current_user`
+        `${process.env.baseUrl}/api/v1/users/show_current_user`
       );
       commit("setUser", response);
       commit("clearError");
@@ -34,7 +34,7 @@ export const actions = {
   async editUser({ commit }, { userId, params }) {
     try {
       const response = await this.$axios.$put(
-        `http://localhost:3001/api/v1/users/${userId}`,
+        `${process.env.baseUrl}/api/v1/users/${userId}`,
         params
       );
       commit("setUser", response);
