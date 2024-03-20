@@ -3,8 +3,7 @@ class Api::V1::PostsController < ApplicationController
     
     def index
         posts = Post.includes(:user)
-        render json: posts.as_json(include: { user: { only: [:id, :name, :image] } },
-        methods: :formatted_created_at)
+        render json: posts.as_json(include: { user: { only: [:id, :name, :image] } },methods: :formatted_created_at)
     end
 
     def create
@@ -33,6 +32,7 @@ class Api::V1::PostsController < ApplicationController
         @post.destroy
     end
 
+    # 自身の投稿のみを取得する
     def own_posts
         current_user_posts = current_user&.posts
         if current_user_posts&.any?
@@ -41,6 +41,19 @@ class Api::V1::PostsController < ApplicationController
             render json: [], status: :not_found
         end
     end
+
+    # NOTE:アーキテクチャ変更や機能が複雑化し複数のモデル間での検索機能として独立させたい場合は別途コントローラーを切り出す予定
+    def search
+        searched_posts = if params[:keyword].present?
+                            Post.where('title LIKE ?', "%" + Post.sanitize_sql_like(params[:keyword]) + "%")
+                         else  
+                            Post.all
+                         end
+        
+        searched_posts = searched_posts.includes(:user)
+        render json: searched_posts.as_json(include: { user: { only: [:id, :name, :image] } },methods: :formatted_created_at)
+    end
+
 
     private 
     def post_params

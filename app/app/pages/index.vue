@@ -31,7 +31,7 @@ import $axios from "axios";
 
 export default Vue.extend({
   async asyncData() {
-    const response = await $axios.get("http://localhost:3001/api/v1/posts");
+    const response = await $axios.get(`${process.env.baseUrl}/api/v1/posts`);
     return {
       data: response.data,
     };

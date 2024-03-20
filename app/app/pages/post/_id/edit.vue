@@ -62,7 +62,7 @@ export default {
   async asyncData({ params, $axios, redirect }) {
     const id = params.id;
     const response = await $axios.get(
-      `http://localhost:3001/api/v1/posts/${id}`
+      `${process.env.baseUrl}/api/v1/posts/${id}`
     );
     if (!response.data.is_current_user_post_owner) {
       return redirect(`/post/${id}`);

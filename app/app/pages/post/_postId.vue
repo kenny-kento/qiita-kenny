@@ -53,7 +53,7 @@ export default {
   async asyncData({ params, $axios }) {
     const id = params.postId;
     const response = await $axios.get(
-      `http://localhost:3001/api/v1/posts/${id}`
+      `${process.env.baseUrl}/api/v1/posts/${id}`
     );
     return {
       data: response.data,
