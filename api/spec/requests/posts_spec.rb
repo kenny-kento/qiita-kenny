@@ -1,5 +1,3 @@
-# require 'rails_helper'
-
 RSpec.describe "Posts", type: :request do
 
   # Factoryを使ってテスト用のユーザーと投稿を作成。
@@ -7,8 +5,8 @@ RSpec.describe "Posts", type: :request do
   let(:post) { create(:post, user: user) }
 
 
-  describe "GET /search" do
-    context 'キーワードがある時' do
+  describe "記事検索機能" do
+    context '検索キーワードにマッチした場合' do
       it 'キーワードと一致する記事を返却する' do
         # キーワードに一致する投稿と一致しない投稿をそれぞれ作成
         matching_post = create(:post, title: 'Rails is awesome', user: user)
@@ -21,7 +19,7 @@ RSpec.describe "Posts", type: :request do
       end
     end
 
-    context 'キーワードが指定されていない時' do
+    context 'キーワードが指定されていない場合' do
       it 'すべての記事を返却する' do
         posts = create_list(:post, 2, user: user)
     
