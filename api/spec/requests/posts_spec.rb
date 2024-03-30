@@ -19,6 +19,17 @@ RSpec.describe "Posts", type: :request do
       end
     end
 
+    context '検索キーワードとマッチする記事が1件もない場合' do
+      it '何も返却しない' do
+        non_matching_post = create(:post, title: 'Python tutorial', user: user)
+    
+        get '/api/v1/posts/search', params: { keyword: 'Rails' }
+    
+        json_response = JSON.parse(response.body)
+        expect(json_response.size).to eq(0)
+      end
+    end
+
     context 'キーワードが指定されていない場合' do
       it 'すべての記事を返却する' do
         posts = create_list(:post, 2, user: user)
