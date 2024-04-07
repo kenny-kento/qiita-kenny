@@ -3,18 +3,26 @@
     <div class="wrapper_left">
       <ul>
         <li>
-          <div class="circle">
+          <div v-if="is_liked" class="circle">
+            <font-awesome-icon
+              :icon="['fas', 'heart']"
+              class="font-awesome-size liked_post"
+              @click="RemoveLike(post.id)"
+            />
+          </div>
+          <div v-else class="circle">
             <font-awesome-icon
               :icon="['far', 'heart']"
               class="font-awesome-size"
+              @click="addLike"
             />
           </div>
         </li>
         <li>
           <div class="fab-box">
             <nuxt-link
-              :to="`/post/${data.id}/edit`"
-              v-if="data.is_current_user_post_owner"
+              :to="`/post/${post.id}/edit`"
+              v-if="post.is_current_user_post_owner"
             >
               <font-awesome-icon
                 :icon="['fas', 'pen-to-square']"
@@ -32,17 +40,17 @@
         <div class="content_right">
           <p>@kenny</p>
           <p>
-            更新日:{{ data.formatted_updated_at }} 投稿日:{{
-              data.formatted_created_at
+            更新日:{{ post.formatted_updated_at }} 投稿日:{{
+              post.formatted_created_at
             }}
           </p>
         </div>
       </div>
-      <h1>{{ data.title }}</h1>
+      <h1>{{ post.title }}</h1>
       <span>タグ1</span>
       <div
         class="markdown markdown_wrapper"
-        v-html="$md.render(data.content)"
+        v-html="$md.render(post.content)"
       ></div>
     </div>
   </div>
@@ -50,14 +58,43 @@
 
 <script>
 export default {
+  data() {
+    return {
+      post: [],
+      is_liked: false,
+    };
+  },
   async asyncData({ params, $axios }) {
     const id = params.postId;
     const response = await $axios.get(
       `${process.env.baseUrl}/api/v1/posts/${id}`
     );
     return {
-      data: response.data,
+      post: response.data,
+      is_liked: response.data.is_liked,
     };
+  },
+  methods: {
+    async addLike() {
+      try {
+        await this.$axios.post("/api/v1/likes", {
+          like: {
+            post_id: this.post.id,
+          },
+        });
+        this.is_liked = true;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    async RemoveLike(id) {
+      try {
+        await this.$axios.delete(`/api/v1/likes/${id}`);
+        this.is_liked = false;
+      } catch (error) {
+        console.log(e);
+      }
+    },
   },
 };
 </script>
@@ -108,6 +145,10 @@ export default {
 
 .font-awesome-size {
   font-size: 1.3rem;
+}
+
+.liked_post {
+  color: red;
 }
 
 .fab-box {

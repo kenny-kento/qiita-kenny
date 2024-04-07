@@ -77,10 +77,13 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :posts do
         get 'own_posts', on: :collection
+        get 'liked_posts', on: :collection     
         get 'search', on: :collection
       end
       resources :users, only: [:update] do
         get 'show_current_user', on: :collection     
+      end
+      resources :likes, only: [:create, :destroy] do
       end
     end
   end

@@ -7,7 +7,11 @@
     <div class="right">
       <div v-for="(i, index) in data" :key="index" class="content_box flex">
         <div class="content_left">
-          <p class="circle">写真</p>
+          <img
+            :src="i.user.icon_url ? i.user.icon_url : '/user_default.png'"
+            alt="写真"
+            class="circle"
+          />
         </div>
         <div class="content_right">
           <p class="post_user_name">@{{ i.user.name }}</p>

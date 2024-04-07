@@ -11,13 +11,19 @@ class Api::V1::PostsController < ApplicationController
             if @post.save
                 render json: @post
             else
-                render json: @post.erros, status: 422
+                render json: @post.errors, status: 422
             end
     end
 
     def show
         is_current_user_post_owner = current_user&.id == @post.user_id
-        render json: @post.as_json(methods: [:formatted_created_at, :formatted_updated_at]).merge(is_current_user_post_owner: is_current_user_post_owner)
+        # current_userが@postに対していいねしているかどうかの判定
+        is_liked = Like.exists?(user_id: current_user&.id, post_id: @post.id)
+
+        render json: @post.as_json(methods: [:formatted_created_at, :formatted_updated_at]).merge(
+            is_current_user_post_owner: is_current_user_post_owner,
+            is_liked: is_liked
+            )
     end
 
     def update
@@ -54,6 +60,14 @@ class Api::V1::PostsController < ApplicationController
         render json: searched_posts.as_json(include: { user: { only: [:id, :name, :image] } },methods: :formatted_created_at)
     end
 
+    def liked_posts
+        liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id })
+        if liked_posts&.any?
+            render json: liked_posts.as_json(methods: [:formatted_created_at, :formatted_updated_at])
+        else
+            render json: [], status: :not_found
+        end
+    end
 
     private 
     def post_params
