@@ -3,20 +3,20 @@
     <div class="wrapper_left">
       <ul>
         <li>
-          <div v-if="is_liked" class="circle">
-            <font-awesome-icon
-              :icon="['fas', 'heart']"
-              class="font-awesome-size liked_post"
-              @click="RemoveLike(post.id)"
-            />
-          </div>
-          <div v-else class="circle">
-            <font-awesome-icon
-              :icon="['far', 'heart']"
-              class="font-awesome-size"
-              @click="addLike"
-            />
-          </div>
+          <button @click="handleLike" class="like-button">
+            <div v-if="is_liked" class="circle">
+              <font-awesome-icon
+                :icon="['fas', 'heart']"
+                class="font-awesome-size liked_post"
+              />
+            </div>
+            <div v-else class="circle">
+              <font-awesome-icon
+                :icon="['far', 'heart']"
+                class="font-awesome-size"
+              />
+            </div>
+          </button>
         </li>
         <li>
           <div class="fab-box">
@@ -69,12 +69,20 @@ export default {
     const response = await $axios.get(
       `${process.env.baseUrl}/api/v1/posts/${id}`
     );
+    console.log(response);
     return {
       post: response.data,
       is_liked: response.data.is_liked,
     };
   },
   methods: {
+    handleLike() {
+      if (this.is_liked) {
+        this.removeLike(this.post.id);
+      } else {
+        this.addLike();
+      }
+    },
     async addLike() {
       try {
         await this.$axios.post("/api/v1/likes", {
@@ -87,11 +95,11 @@ export default {
         console.log(e);
       }
     },
-    async RemoveLike(id) {
+    async removeLike(id) {
       try {
         await this.$axios.delete(`/api/v1/likes/${id}`);
         this.is_liked = false;
-      } catch (error) {
+      } catch (e) {
         console.log(e);
       }
     },

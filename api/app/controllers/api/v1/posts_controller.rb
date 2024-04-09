@@ -63,7 +63,7 @@ class Api::V1::PostsController < ApplicationController
     def liked_posts
         user_liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id })
         if user_liked_posts.any?
-            render json: liked_posts.as_json(methods: [:formatted_created_at, :formatted_updated_at])
+            render json: user_liked_posts.as_json(methods: [:formatted_created_at, :formatted_updated_at])
         else
             render json: []
         end
