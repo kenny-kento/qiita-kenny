@@ -61,11 +61,11 @@ class Api::V1::PostsController < ApplicationController
     end
 
     def liked_posts
-        liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id })
-        if liked_posts&.any?
+        user_liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id })
+        if user_liked_posts.any?
             render json: liked_posts.as_json(methods: [:formatted_created_at, :formatted_updated_at])
         else
-            render json: [], status: :not_found
+            render json: []
         end
     end
 

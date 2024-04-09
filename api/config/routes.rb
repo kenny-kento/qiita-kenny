@@ -34,6 +34,7 @@
 #                                          POST   /api/auth(.:format)                                                                               devise_token_auth/registrations#create
 #                  api_auth_validate_token GET    /api/auth/validate_token(.:format)                                                                devise_token_auth/token_validations#validate_token
 #                   own_posts_api_v1_posts GET    /api/v1/posts/own_posts(.:format)                                                                 api/v1/posts#own_posts
+#                 liked_posts_api_v1_posts GET    /api/v1/posts/liked_posts(.:format)                                                               api/v1/posts#liked_posts
 #                      search_api_v1_posts GET    /api/v1/posts/search(.:format)                                                                    api/v1/posts#search
 #                             api_v1_posts GET    /api/v1/posts(.:format)                                                                           api/v1/posts#index
 #                                          POST   /api/v1/posts(.:format)                                                                           api/v1/posts#create
@@ -44,6 +45,8 @@
 #           show_current_user_api_v1_users GET    /api/v1/users/show_current_user(.:format)                                                         api/v1/users#show_current_user
 #                              api_v1_user PATCH  /api/v1/users/:id(.:format)                                                                       api/v1/users#update
 #                                          PUT    /api/v1/users/:id(.:format)                                                                       api/v1/users#update
+#                             api_v1_likes POST   /api/v1/likes(.:format)                                                                           api/v1/likes#create
+#                              api_v1_like DELETE /api/v1/likes/:id(.:format)                                                                       api/v1/likes#destroy
 #            rails_postmark_inbound_emails POST   /rails/action_mailbox/postmark/inbound_emails(.:format)                                           action_mailbox/ingresses/postmark/inbound_emails#create
 #               rails_relay_inbound_emails POST   /rails/action_mailbox/relay/inbound_emails(.:format)                                              action_mailbox/ingresses/relay/inbound_emails#create
 #            rails_sendgrid_inbound_emails POST   /rails/action_mailbox/sendgrid/inbound_emails(.:format)                                           action_mailbox/ingresses/sendgrid/inbound_emails#create
