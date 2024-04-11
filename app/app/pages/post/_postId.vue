@@ -83,6 +83,7 @@ export default {
         this.addLike();
       }
     },
+    //TODO:未ログイン状態でいいねを押すとログインがポップアップで求められるように調整が必要。
     async addLike() {
       try {
         await this.$axios.post("/api/v1/likes", {

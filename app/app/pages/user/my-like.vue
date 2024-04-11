@@ -14,6 +14,7 @@
     <p>「いいね」をした投稿がありません</p>
   </div>
 </template>
+
 <script>
 export default {
   data() {
