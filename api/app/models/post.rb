@@ -1,5 +1,6 @@
 class Post < ApplicationRecord
   belongs_to :user
+  has_many :likes, dependent: :destroy
   default_scope -> { order('created_at DESC') }
 
   def formatted_created_at

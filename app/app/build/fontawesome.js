@@ -7,6 +7,7 @@ const solid = [
   "faChevronRight",
   "faDownload",
   "faEdit",
+  "faHeart",
   "faUpload",
   "faUser",
   "faTag",

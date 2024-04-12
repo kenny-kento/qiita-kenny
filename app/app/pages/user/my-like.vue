@@ -1,11 +1,41 @@
 <template>
-  <div class="mypost_wrapper">
-    <p>投稿がありません</p>
+  <div v-if="posts.length" class="mypost_wrapper">
+    <div v-for="(i, index) in posts" :key="index" class="content_box1">
+      <p><font-awesome-icon :icon="['fas', 'tag']" />タグ</p>
+      <nuxt-link :to="`/post/${i.id}`">
+        <h3 class="post_title">
+          {{ i.title }}
+        </h3>
+      </nuxt-link>
+      <p class="post_date">{{ i.formatted_created_at }}</p>
+    </div>
+  </div>
+  <div v-else class="mypost_wrapper">
+    <p>「いいね」をした投稿がありません</p>
   </div>
 </template>
 
 <script>
-export default {};
+export default {
+  data() {
+    return {
+      posts: [],
+    };
+  },
+  mounted() {
+    this.fetchData();
+  },
+  methods: {
+    async fetchData() {
+      try {
+        const response = await this.$axios.get("api/v1/posts/liked_posts");
+        this.posts = response.data;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+  },
+};
 </script>
 
 <style>
