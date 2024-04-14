@@ -16,6 +16,8 @@
             <input
               type="text"
               placeholder="タグを入力してください。スペース区切りで入力できます。"
+              v-model="inputTag"
+              @change="addTags"
             />
           </li>
           <li>
@@ -56,6 +58,8 @@ export default {
     return {
       title: "",
       content: "",
+      tags: [],
+      inputTag: "",
       showModal: false,
     };
   },
@@ -71,15 +75,46 @@ export default {
       id: response.data.id,
       title: response.data.title,
       content: response.data.content,
+      inputTag: response.data.tags.map((tag) => tag.tag_name).join(", "),
     };
   },
   methods: {
+    addTags() {
+      // カンマでタグを分割し、空白を削除して新しいタグの配列を生成する
+      const newTags = this.inputTag
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0); // 空のタグを除外
+
+      // 既存のタグ配列から、もはや含まれていないタグを削除し、
+      // 新規に追加されたタグのみを追加する
+      const updatedTags = this.tags.slice();
+      // ユーザーが削除したタグを`updatedTags`から削除する
+      this.tags.forEach((tag) => {
+        if (!newTags.includes(tag)) {
+          const index = updatedTags.indexOf(tag);
+          if (index > -1) {
+            updatedTags.splice(index, 1);
+          }
+        }
+      });
+      // 新しく追加されたタグを`updatedTags`に追加する
+      newTags.forEach((tag) => {
+        if (!this.tags.includes(tag)) {
+          updatedTags.push(tag);
+        }
+      });
+      // `this.tags`を更新したタグ配列で置き換える
+      this.tags = updatedTags;
+      console.log(this.tags);
+    },
     async editPost(id) {
       try {
         await this.$axios.put(`/api/v1/posts/${id}`, {
           post: {
             title: this.title,
             content: this.content,
+            tags: this.tags,
           },
         });
         this.$router.push(`/post/${id}`);

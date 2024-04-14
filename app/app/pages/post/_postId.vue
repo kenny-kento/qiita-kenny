@@ -47,7 +47,17 @@
         </div>
       </div>
       <h1>{{ post.title }}</h1>
-      <span>タグ1</span>
+      <template v-if="post.tags.length">
+        <p>
+          <span v-for="(t, index) in post.tags" :key="index">
+            <font-awesome-icon :icon="['fas', 'tag']" />
+            {{ t.tag_name + "," }}
+          </span>
+        </p>
+      </template>
+      <template v-else>
+        <p><font-awesome-icon :icon="['fas', 'tag']" />タグなし</p>
+      </template>
       <div
         class="markdown markdown_wrapper"
         v-html="$md.render(post.content)"

@@ -25,14 +25,16 @@
             <p>
               <span v-for="(t, index) in i.tags" :key="index">
                 <font-awesome-icon :icon="['fas', 'tag']" />
-                {{ t.tag_name + "," }}
+                {{ t.tag_name }}
               </span>
             </p>
           </template>
           <template v-else>
             <p><font-awesome-icon :icon="['fas', 'tag']" />タグなし</p>
           </template>
-          <p>いいね数</p>
+          <p>
+            <font-awesome-icon :icon="['fas', 'heart']" />{{ i.likes_count }}
+          </p>
         </div>
       </div>
     </div>

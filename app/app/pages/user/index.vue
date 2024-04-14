@@ -10,11 +10,11 @@
         <p class="user_name">@{{ user.name }}</p>
         <div class="count_box">
           <div class="post_count_box">
-            <p>1</p>
+            <p>{{ user.posts_count }}</p>
             <p>投稿</p>
           </div>
           <div class="like_count_box">
-            <p>1</p>
+            <p>{{ user.received_likes_count }}</p>
             <p>いいね</p>
           </div>
         </div>

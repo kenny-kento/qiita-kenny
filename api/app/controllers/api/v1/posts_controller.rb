@@ -2,7 +2,7 @@ class Api::V1::PostsController < ApplicationController
     before_action :set_post, only:[:show, :edit, :update, :destroy]
     
     def index
-        posts = Post.includes(:user, :tags)
+        posts = Post.includes(:user, :tags, :likes)
 
         posts_data = posts.map do |post|
             post_data = post.as_json(
@@ -14,6 +14,7 @@ class Api::V1::PostsController < ApplicationController
             )
             # ユーザーのアイコンURLを取得してpost_dataに含める
             append_user_icon_url(post, post_data)
+            post_data[:likes_count] = post.likes.count
             post_data
         end
         render json: posts_data
@@ -23,7 +24,7 @@ class Api::V1::PostsController < ApplicationController
         @post = current_user.posts.build(post_params.except(:tags))
             if @post.save
                 #FIX:タグづけに失敗すると投稿の作成自体もロールバックさせるようにして整合性を取れるようにしたい
-                update_tags(@post)
+                create_tags(@post)
                 render json: @post
             else
                 render json: @post.errors, status: 422
@@ -35,14 +36,18 @@ class Api::V1::PostsController < ApplicationController
         # current_userが@postに対していいねしているかどうかの判定
         is_liked = Like.exists?(user_id: current_user&.id, post_id: @post.id)
 
-        render json: @post.as_json(methods: [:formatted_created_at, :formatted_updated_at]).merge(
+        render json: @post.as_json(
+            methods: [:formatted_created_at, :formatted_updated_at],
+            include: { tags: { only: [:tag_name] } }
+        ).merge(
             is_current_user_post_owner: is_current_user_post_owner,
             is_liked: is_liked
-            )
+        )
     end
 
     def update
-        if @post.update(post_params)
+        if @post.update(post_params.except(:tags))
+            update_tags(@post)
             render json: @post
         else
             render json: @post.erros, status: 422
@@ -57,7 +62,10 @@ class Api::V1::PostsController < ApplicationController
     def own_posts
         current_user_posts = current_user&.posts
         if current_user_posts&.any?
-            render json: current_user_posts.as_json(methods: [:formatted_created_at, :formatted_updated_at])
+            render json: current_user_posts.as_json(
+                methods: [:formatted_created_at, :formatted_updated_at],
+                include: { tags: { only: [:tag_name] } }
+                )
         else
             render json: [], status: :not_found
         end
@@ -78,7 +86,10 @@ class Api::V1::PostsController < ApplicationController
     def liked_posts
         user_liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id })
         if user_liked_posts.any?
-            render json: user_liked_posts.as_json(methods: [:formatted_created_at, :formatted_updated_at])
+            render json: user_liked_posts.as_json(
+                methods: [:formatted_created_at, :formatted_updated_at],
+                include: { tags: { only: [:tag_name] } }
+                )
         else
             render json: []
         end
@@ -93,7 +104,7 @@ class Api::V1::PostsController < ApplicationController
         @post = Post.find(params[:id])
     end
 
-    def update_tags(post)
+    def create_tags(post)
         # タグの配列を受け取ります（リクエストから）
         tags = params[:post][:tags] 
     
@@ -103,6 +114,32 @@ class Api::V1::PostsController < ApplicationController
           post.tags << tag unless post.tags.include?(tag)
         end
     end
+
+    def update_tags(post)
+        # リクエストからタグの配列を受け取る
+        new_tags = params[:post][:tags].map(&:strip)
+      
+        # 既存のタグ
+        old_tags = post.tags.map(&:tag_name)
+      
+        # 追加されるべきタグを見つける
+        tags_to_add = new_tags - old_tags
+      
+        # 削除されるべきタグを見つける
+        tags_to_remove = old_tags - new_tags
+      
+        # 追加されるべきタグを追加
+        tags_to_add.each do |tag_name|
+          tag = Tag.find_or_create_by(tag_name: tag_name)
+          post.tags << tag unless post.tags.include?(tag)
+        end
+      
+        # 削除されるべきタグを削除
+        tags_to_remove.each do |tag_name|
+          tag = Tag.find_by(tag_name: tag_name)
+          post.tags.delete(tag) if tag
+        end
+      end      
 
     def append_user_icon_url(post, post_data)
         if post.user && post.user.icon.attached?
