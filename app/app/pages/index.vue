@@ -21,7 +21,17 @@
               {{ i.title }}
             </h3>
           </nuxt-link>
-          <p><font-awesome-icon :icon="['fas', 'tag']" />タグ</p>
+          <template v-if="i.tags.length">
+            <p>
+              <span v-for="(t, index) in i.tags" :key="index">
+                <font-awesome-icon :icon="['fas', 'tag']" />
+                {{ t.tag_name + "," }}
+              </span>
+            </p>
+          </template>
+          <template v-else>
+            <p><font-awesome-icon :icon="['fas', 'tag']" />タグなし</p>
+          </template>
           <p>いいね数</p>
         </div>
       </div>
@@ -36,6 +46,7 @@ import $axios from "axios";
 export default Vue.extend({
   async asyncData() {
     const response = await $axios.get(`${process.env.baseUrl}/api/v1/posts`);
+    console.log(response.data);
     return {
       data: response.data,
     };

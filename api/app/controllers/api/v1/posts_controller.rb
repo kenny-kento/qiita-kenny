@@ -2,13 +2,28 @@ class Api::V1::PostsController < ApplicationController
     before_action :set_post, only:[:show, :edit, :update, :destroy]
     
     def index
-        posts = Post.includes(:user)
-        render json: posts.as_json(include: { user: { only: [:id, :name, :image] } },methods: :formatted_created_at)
+        posts = Post.includes(:user, :tags)
+
+        posts_data = posts.map do |post|
+            post_data = post.as_json(
+              include: {
+                user: { only: [:id, :name, :image] },
+                tags: { only: [:tag_name] } 
+              },
+              methods: :formatted_created_at
+            )
+            # ユーザーのアイコンURLを取得してpost_dataに含める
+            append_user_icon_url(post, post_data)
+            post_data
+        end
+        render json: posts_data
     end
 
     def create
-        @post = current_user.posts.create(post_params)
+        @post = current_user.posts.build(post_params.except(:tags))
             if @post.save
+                #FIX:タグづけに失敗すると投稿の作成自体もロールバックさせるようにして整合性を取れるようにしたい
+                update_tags(@post)
                 render json: @post
             else
                 render json: @post.errors, status: 422
@@ -71,11 +86,29 @@ class Api::V1::PostsController < ApplicationController
 
     private 
     def post_params
-        params.require(:post).permit(:title, :content,)
+        params.require(:post).permit(:title, :content, tags: [])
     end
 
     def set_post
         @post = Post.find(params[:id])
+    end
+
+    def update_tags(post)
+        # タグの配列を受け取ります（リクエストから）
+        tags = params[:post][:tags] 
+    
+        # タグを処理する
+        tags.each do |tag_name|
+          tag = Tag.find_or_create_by(tag_name: tag_name.strip)
+          post.tags << tag unless post.tags.include?(tag)
+        end
+    end
+
+    def append_user_icon_url(post, post_data)
+        if post.user && post.user.icon.attached?
+          post_data['user'] ||= {}
+          post_data['user']['icon_url'] = rails_blob_url(post.user.icon)
+        end
     end
 
 end
