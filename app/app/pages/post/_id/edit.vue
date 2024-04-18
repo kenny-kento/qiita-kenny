@@ -15,7 +15,7 @@
           <li>
             <input
               type="text"
-              placeholder="タグを入力してください。スペース区切りで入力できます。"
+              placeholder="タグを入力してください。カンマ(,)区切りで入力できます。"
               v-model="inputTag"
               @change="addTags"
             />

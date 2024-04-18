@@ -14,23 +14,30 @@ class Api::V1::PostsController < ApplicationController
             )
             # ユーザーのアイコンURLを取得してpost_dataに含める
             append_user_icon_url(post, post_data)
-            post_data[:likes_count] = post.likes.count
+            post_data[:likes_count] = post.likes.size
             post_data
         end
         render json: posts_data
     end
 
     def create
-        @post = current_user.posts.build(post_params.except(:tags))
+        ActiveRecord::Base.transaction do
+            @post = current_user.posts.build(post_params.except(:tags))
             if @post.save
-                #FIX:タグづけに失敗すると投稿の作成自体もロールバックさせるようにして整合性を取れるようにしたい
-                create_tags(@post)
+                # タグがある場合はタグづけ処理を行う
+                create_tags(@post) unless params[:post][:tags].blank?
+    
                 render json: @post
             else
-                render json: @post.errors, status: 422
+                render json: @post.errors, status: :unprocessable_entity
+                raise ActiveRecord::Rollback
             end
+        end
+        rescue => e
+        #NOTE:タグづけに失敗した時は投稿の保存自体もロールバックさせる。
+        render json: { error: "投稿とタグ付けの処理に失敗しました: #{e.message}" }, status: :internal_server_error
     end
-
+    
     def show
         is_current_user_post_owner = current_user&.id == @post.user_id
         # current_userが@postに対していいねしているかどうかの判定
@@ -46,12 +53,18 @@ class Api::V1::PostsController < ApplicationController
     end
 
     def update
-        if @post.update(post_params.except(:tags))
-            update_tags(@post)
-            render json: @post
-        else
-            render json: @post.erros, status: 422
+        ActiveRecord::Base.transaction do
+            if @post.update(post_params.except(:tags))
+                update_tags(@post) unless params[:post][:tags].blank?
+                render json: @post
+            else
+                render json: @post.errors, status: :unprocessable_entity
+                raise ActiveRecord::Rollback
+            end
         end
+        rescue => e
+        #NOTE:タグづけに失敗した時は投稿の保存自体もロールバックさせる。
+            render json: { error: "投稿の更新またはタグの更新に失敗しました。: #{e.message}" }, status: :internal_server_error
     end
 
     def destroy
@@ -105,46 +118,48 @@ class Api::V1::PostsController < ApplicationController
     end
 
     def create_tags(post)
-        # タグの配列を受け取ります（リクエストから）
-        tags = params[:post][:tags] 
-    
-        # タグを処理する
-        tags.each do |tag_name|
-          tag = Tag.find_or_create_by(tag_name: tag_name.strip)
-          post.tags << tag unless post.tags.include?(tag)
-        end
-    end
+        tags = params[:post][:tags].map(&:strip).uniq
+
+        add_tags(tags, post)
+    rescue ActiveRecord::RecordInvalid => e
+        raise ActiveRecord::Rollback, "タグの作成/関連付けに失敗しました: #{e.message}"
+    end    
 
     def update_tags(post)
-        # リクエストからタグの配列を受け取る
+        # NOTE:現状のタグと更新で渡ってきたタグを整理する
         new_tags = params[:post][:tags].map(&:strip)
+        old_tags = post.tags.pluck(:tag_name)
       
-        # 既存のタグ
-        old_tags = post.tags.map(&:tag_name)
-      
-        # 追加されるべきタグを見つける
+        # NOTE:追加されるタグ、削除するタグを洗い出す。
         tags_to_add = new_tags - old_tags
-      
-        # 削除されるべきタグを見つける
         tags_to_remove = old_tags - new_tags
       
         # 追加されるべきタグを追加
-        tags_to_add.each do |tag_name|
-          tag = Tag.find_or_create_by(tag_name: tag_name)
-          post.tags << tag unless post.tags.include?(tag)
-        end
-      
+        add_tags(tags_to_add, post)
         # 削除されるべきタグを削除
         tags_to_remove.each do |tag_name|
           tag = Tag.find_by(tag_name: tag_name)
           post.tags.delete(tag) if tag
         end
-      end      
+    rescue ActiveRecord::RecordInvalid => e
+        raise ActiveRecord::Rollback, "タグの更新/関連付けに失敗しました: #{e.message}"
+    end      
 
     def append_user_icon_url(post, post_data)
         if post.user && post.user.icon.attached?
           post_data['user'] ||= {}
           post_data['user']['icon_url'] = rails_blob_url(post.user.icon)
+        end
+    end
+
+    def add_tags(tags, post)
+        # NOTE:tagsに含まれるタグを一括で検索した上で存在しないタグは作成する。
+        existing_tags = Tag.where(tag_name: tags).index_by(&:tag_name)
+        
+        tags.each do |tag_name|
+            tag = existing_tags[tag_name] || Tag.create(tag_name: tag_name)
+            #NOTE:紐付けがされていないタグの紐付けを行う。
+            post.tags << tag unless post.tags.exists?(tag_name: tag_name)
         end
     end
 
