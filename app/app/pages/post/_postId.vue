@@ -79,7 +79,6 @@ export default {
     const response = await $axios.get(
       `${process.env.baseUrl}/api/v1/posts/${id}`
     );
-    console.log(response);
     return {
       post: response.data,
       is_liked: response.data.is_liked,

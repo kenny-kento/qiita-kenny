@@ -106,7 +106,6 @@ export default {
       });
       // `this.tags`を更新したタグ配列で置き換える
       this.tags = updatedTags;
-      console.log(this.tags);
     },
     async editPost(id) {
       try {

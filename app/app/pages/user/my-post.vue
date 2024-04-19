@@ -39,7 +39,6 @@ export default {
       try {
         const response = await this.$axios.get("api/v1/posts/own_posts");
         this.posts = response.data;
-        console.log(this.posts);
       } catch (e) {
         console.log(e);
       }

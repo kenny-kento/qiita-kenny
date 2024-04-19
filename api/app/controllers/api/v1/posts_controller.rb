@@ -73,7 +73,8 @@ class Api::V1::PostsController < ApplicationController
 
     # 自身の投稿のみを取得する
     def own_posts
-        current_user_posts = current_user&.posts
+        current_user_posts = current_user&.posts.includes(:tags)
+
         if current_user_posts&.any?
             render json: current_user_posts.as_json(
                 methods: [:formatted_created_at, :formatted_updated_at],
@@ -157,7 +158,7 @@ class Api::V1::PostsController < ApplicationController
         existing_tags = Tag.where(tag_name: tags).index_by(&:tag_name)
         
         tags.each do |tag_name|
-            tag = existing_tags[tag_name] || Tag.create(tag_name: tag_name)
+            tag = existing_tags[tag_name] || Tag.create!(tag_name: tag_name)
             #NOTE:紐付けがされていないタグの紐付けを行う。
             post.tags << tag unless post.tags.exists?(tag_name: tag_name)
         end

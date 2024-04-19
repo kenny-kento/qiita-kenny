@@ -48,7 +48,6 @@ import $axios from "axios";
 export default Vue.extend({
   async asyncData() {
     const response = await $axios.get(`${process.env.baseUrl}/api/v1/posts`);
-    console.log(response.data);
     return {
       data: response.data,
     };
