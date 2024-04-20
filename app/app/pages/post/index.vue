@@ -8,7 +8,9 @@
         <li>
           <input
             type="text"
-            placeholder="タグを入力してください。スペース区切りで入力できます。"
+            placeholder="タグを入力してください。カンマ(,)区切りで入力できます。"
+            v-model="inputTag"
+            @change="addTags"
           />
         </li>
         <li>
@@ -31,15 +33,48 @@ export default {
     return {
       title: "",
       content: "",
+      inputTag: "",
+      tags: [],
     };
   },
   methods: {
+    addTags() {
+      // カンマでタグを分割し、空白を削除して新しいタグの配列を生成する
+      const newTags = this.inputTag
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
+
+      // Setを使用して、効率的に重複を避けながら既存タグと新規タグを比較する
+      const currentTagsSet = new Set(this.tags);
+      const newTagsSet = new Set(newTags);
+
+      // 新規タグで現在のタグセットを更新する
+      newTags.forEach((tag) => {
+        // 新規タグが既存のセットに含まれるかチェック
+        if (!currentTagsSet.has(tag)) {
+          // 含まれていなければ追加
+          currentTagsSet.add(tag);
+        }
+      });
+
+      this.tags.forEach((tag) => {
+        // 現在のタグが新規タグセットに含まれていない場合は削除
+        if (!newTagsSet.has(tag)) {
+          currentTagsSet.delete(tag);
+        }
+      });
+
+      // `this.tags`を更新したタグ配列で置き換える
+      this.tags = Array.from(currentTagsSet);
+    },
     async newPost() {
       try {
         await this.$axios.post("/api/v1/posts", {
           post: {
             title: this.title,
             content: this.content,
+            tags: this.tags,
           },
         });
         this.$router.push("/");

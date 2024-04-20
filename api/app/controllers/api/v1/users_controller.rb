@@ -2,12 +2,17 @@ class Api::V1::UsersController < ApplicationController
 
     def show_current_user
       # NOTE:未認証であれば401エラーを返却する。
-      unless current_user
-        return head :unauthorized
-      end
+      return head :unauthorized unless current_user
     
       user_data = current_user.attributes
-      user_data[:icon_url] = rails_blob_url(current_user.icon) if current_user.icon.attached?
+
+      # HACK:　将来的にposts_countとreceived_likes_countにcounter_cacheを利用したパフォーマンス改善を検討
+      user_data.merge!({
+        icon_url: current_user.icon.attached? ? rails_blob_url(current_user.icon) : nil,
+        posts_count: current_user.posts.count,
+        received_likes_count: current_user.posts.joins(:likes).count
+       })
+
       render json: user_data
     end
     

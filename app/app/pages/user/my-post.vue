@@ -1,7 +1,17 @@
 <template>
   <div v-if="posts.length" class="mypost_wrapper">
     <div v-for="(i, index) in posts" :key="index" class="content_box1">
-      <p><font-awesome-icon :icon="['fas', 'tag']" />タグ</p>
+      <template v-if="i.tags.length">
+        <p>
+          <span v-for="(t, index) in i.tags" :key="index">
+            <font-awesome-icon :icon="['fas', 'tag']" />
+            {{ t.tag_name }}
+          </span>
+        </p>
+      </template>
+      <template v-else>
+        <p><font-awesome-icon :icon="['fas', 'tag']" />タグなし</p>
+      </template>
       <nuxt-link :to="`/post/${i.id}`">
         <h3 class="post_title">
           {{ i.title }}
