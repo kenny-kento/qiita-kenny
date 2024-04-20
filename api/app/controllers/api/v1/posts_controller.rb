@@ -81,7 +81,7 @@ class Api::V1::PostsController < ApplicationController
                 include: { tags: { only: [:tag_name] } }
                 )
         else
-            render json: [], status: :not_found
+            render json: []
         end
     end
 
@@ -98,7 +98,7 @@ class Api::V1::PostsController < ApplicationController
     end
 
     def liked_posts
-        user_liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id })
+        user_liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id }).includes(:tags)
         if user_liked_posts.any?
             render json: user_liked_posts.as_json(
                 methods: [:formatted_created_at, :formatted_updated_at],
@@ -135,9 +135,9 @@ class Api::V1::PostsController < ApplicationController
         tags_to_add = new_tags - old_tags
         tags_to_remove = old_tags - new_tags
       
-        # 追加されるべきタグを追加
+        # NOTE:追加されるべきタグを追加
         add_tags(tags_to_add, post)
-        # 削除されるべきタグを削除
+        # NOTE:削除されるべきタグを削除
         tags_to_remove.each do |tag_name|
           tag = Tag.find_by(tag_name: tag_name)
           post.tags.delete(tag) if tag
@@ -159,7 +159,7 @@ class Api::V1::PostsController < ApplicationController
         
         tags.each do |tag_name|
             tag = existing_tags[tag_name] || Tag.create!(tag_name: tag_name)
-            #NOTE:紐付けがされていないタグの紐付けを行う。
+            # NOTE:紐付けがされていないタグの紐付けを行う。
             post.tags << tag unless post.tags.exists?(tag_name: tag_name)
         end
     end

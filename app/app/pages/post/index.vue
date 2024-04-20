@@ -43,28 +43,30 @@ export default {
       const newTags = this.inputTag
         .split(",")
         .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0); // 空のタグを除外
+        .filter((tag) => tag.length > 0);
 
-      // 既存のタグ配列から、もはや含まれていないタグを削除し、
-      // 新規に追加されたタグのみを追加する
-      const updatedTags = this.tags.slice();
-      // ユーザーが削除したタグを`updatedTags`から削除する
-      this.tags.forEach((tag) => {
-        if (!newTags.includes(tag)) {
-          const index = updatedTags.indexOf(tag);
-          if (index > -1) {
-            updatedTags.splice(index, 1);
-          }
-        }
-      });
-      // 新しく追加されたタグを`updatedTags`に追加する
+      // Setを使用して、効率的に重複を避けながら既存タグと新規タグを比較する
+      const currentTagsSet = new Set(this.tags);
+      const newTagsSet = new Set(newTags);
+
+      // 新規タグで現在のタグセットを更新する
       newTags.forEach((tag) => {
-        if (!this.tags.includes(tag)) {
-          updatedTags.push(tag);
+        // 新規タグが既存のセットに含まれるかチェック
+        if (!currentTagsSet.has(tag)) {
+          // 含まれていなければ追加
+          currentTagsSet.add(tag);
         }
       });
+
+      this.tags.forEach((tag) => {
+        // 現在のタグが新規タグセットに含まれていない場合は削除
+        if (!newTagsSet.has(tag)) {
+          currentTagsSet.delete(tag);
+        }
+      });
+
       // `this.tags`を更新したタグ配列で置き換える
-      this.tags = updatedTags;
+      this.tags = Array.from(currentTagsSet);
     },
     async newPost() {
       try {
