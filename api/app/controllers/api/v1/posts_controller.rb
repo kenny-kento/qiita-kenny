@@ -2,7 +2,7 @@ class Api::V1::PostsController < ApplicationController
     before_action :set_post, only:[:show, :edit, :update, :destroy]
     
     def index
-        posts = Post.includes(:user, :tags, :likes)
+        posts = Post.page(page_number).includes(:user, :tags, :likes)
 
         posts_data = posts.map do |post|
             post_data = post.as_json(
@@ -17,7 +17,10 @@ class Api::V1::PostsController < ApplicationController
             post_data[:likes_count] = post.likes.size
             post_data
         end
-        render json: posts_data
+        render json: {
+            posts: posts_data,       
+            total_pages: posts.total_pages
+          }
     end
 
     def create
@@ -73,19 +76,22 @@ class Api::V1::PostsController < ApplicationController
 
     # 自身の投稿のみを取得する
     def own_posts
-        current_user_posts = current_user&.posts.includes(:tags)
+        current_user_posts = current_user&.posts.page(page_number).includes(:tags)
 
         if current_user_posts&.any?
-            render json: current_user_posts.as_json(
-                methods: [:formatted_created_at, :formatted_updated_at],
-                include: { tags: { only: [:tag_name] } }
-                )
+            render json: {
+                posts: current_user_posts.as_json(
+                    methods: [:formatted_created_at, :formatted_updated_at],
+                    include: { tags: { only: [:tag_name] } }
+                    ),
+                total_pages: current_user_posts.total_pages
+            }
         else
             render json: []
         end
     end
 
-    # NOTE:アーキテクチャ変更や機能が複雑化し複数のモデル間での検索機能として独立させたい場合は別途コントローラーを切り出す予定
+    # HACK:アーキテクチャ変更や機能が複雑化し複数のモデル間での検索機能として独立させたい場合は別途コントローラーを切り出す予定
     def search
         searched_posts = if params[:keyword].present?
                             Post.where('title LIKE ?', "%" + Post.sanitize_sql_like(params[:keyword]) + "%")
@@ -93,17 +99,26 @@ class Api::V1::PostsController < ApplicationController
                             Post.all
                          end
         
-        searched_posts = searched_posts.includes(:user)
-        render json: searched_posts.as_json(include: { user: { only: [:id, :name, :image] } },methods: :formatted_created_at)
+        searched_posts = searched_posts.page(page_number).includes(:user)
+        render json: {
+            posts:  searched_posts.as_json(
+                include: { user: { only: [:id, :name, :image] } },
+                methods: :formatted_created_at
+                ),
+            total_pages: searched_posts.total_pages
+        }
     end
 
     def liked_posts
-        user_liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id }).includes(:tags)
+        user_liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id }).page(page_number).includes(:tags)
         if user_liked_posts.any?
-            render json: user_liked_posts.as_json(
-                methods: [:formatted_created_at, :formatted_updated_at],
-                include: { tags: { only: [:tag_name] } }
-                )
+            render json: {
+                posts: user_liked_posts.as_json(
+                    methods: [:formatted_created_at, :formatted_updated_at],
+                    include: { tags: { only: [:tag_name] } }
+                    ),
+                total_pages: user_liked_posts.total_pages
+            }
         else
             render json: []
         end
@@ -162,6 +177,11 @@ class Api::V1::PostsController < ApplicationController
             # NOTE:紐付けがされていないタグの紐付けを行う。
             post.tags << tag unless post.tags.exists?(tag_name: tag_name)
         end
+    end
+
+    def page_number
+        #NOTE:ページネーション判定に必要なpage番号の確認を行う。
+        page_number = params[:page] || 1
     end
 
 end

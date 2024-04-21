@@ -5,7 +5,7 @@
       <div class="user_lanking">ここにリストが表示される</div>
     </div>
     <div class="right">
-      <div v-for="(i, index) in data" :key="index" class="content_box flex">
+      <div v-for="(i, index) in posts" :key="index" class="content_box flex">
         <div class="content_left">
           <img
             :src="i.user.icon_url ? i.user.icon_url : '/user_default.png'"
@@ -37,6 +37,11 @@
           </p>
         </div>
       </div>
+      <v-pagination
+        v-model="currentPage"
+        :length="totalPages"
+        @input="changePage"
+      ></v-pagination>
     </div>
   </div>
 </template>
@@ -46,11 +51,29 @@ import Vue from "vue";
 import $axios from "axios";
 
 export default Vue.extend({
+  data() {
+    return {
+      currentPage: 1,
+      totalPages: 0,
+      posts: [],
+    };
+  },
   async asyncData() {
     const response = await $axios.get(`${process.env.baseUrl}/api/v1/posts`);
     return {
-      data: response.data,
+      posts: response.data.posts,
+      totalPages: response.data.total_pages,
     };
+  },
+  methods: {
+    async changePage() {
+      const response = await $axios.get(
+        `${process.env.baseUrl}/api/v1/posts?page=${this.currentPage}`
+      );
+
+      this.posts = response.data.posts;
+      this.totalPages = response.data.total_pages;
+    },
   },
 });
 </script>

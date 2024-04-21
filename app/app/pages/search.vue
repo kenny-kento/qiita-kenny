@@ -9,9 +9,9 @@
         }}
       </p>
     </div>
-    <div v-if="data.length" class="search_result">
+    <div v-if="posts.length" class="search_result">
       <div
-        v-for="post in data"
+        v-for="post in posts"
         :key="post.id"
         class="serch_result_content flex"
       >
@@ -31,6 +31,11 @@
           <p>いいね数</p>
         </div>
       </div>
+      <v-pagination
+        v-model="currentPage"
+        :length="totalPages"
+        @input="changePage"
+      ></v-pagination>
     </div>
     <div v-else class="search_result">
       <p>検索キーワードを含む記事がヒットしませんでした</p>
@@ -52,12 +57,13 @@ export default {
         }
       );
       return {
-        data: response.data,
+        posts: response.data.posts,
         keyword: keyword,
+        totalPages: response.data.total_pages,
       };
     } catch (error) {
       console.error("APIリクエストでエラーが発生しました:", error);
-      return { data: [] };
+      return { posts: [] };
     }
   },
   watchQuery: ["q"],
@@ -71,11 +77,26 @@ export default {
       const regex = new RegExp(`(${escapedKeyword})`, "gi");
       return title.replace(regex, '<span class="highlight">$1</span>');
     },
+    async changePage() {
+      const response = await this.$axios.get(
+        `${process.env.baseUrl}/api/v1/posts/search`,
+        {
+          params: {
+            keyword: this.keyword,
+            page: this.currentPage,
+          },
+        }
+      );
+      this.posts = response.data.posts;
+      this.totalPages = response.data.total_pages;
+    },
   },
   data() {
     return {
-      data: [],
+      posts: [],
       keyword: "",
+      currentPage: 1,
+      totalPages: 0,
     };
   },
 };

@@ -56,3 +56,5 @@ gem 'devise_token_auth'
 gem 'devise-i18n'
 #CORS設定
 gem 'rack-cors'
+#ページネーション関連
+gem 'kaminari'
