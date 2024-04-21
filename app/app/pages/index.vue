@@ -5,7 +5,7 @@
       <div class="user_lanking">ここにリストが表示される</div>
     </div>
     <div class="right">
-      <div v-for="(i, index) in data" :key="index" class="content_box flex">
+      <div v-for="(i, index) in posts" :key="index" class="content_box flex">
         <div class="content_left">
           <img
             :src="i.user.icon_url ? i.user.icon_url : '/user_default.png'"
@@ -57,13 +57,13 @@ export default Vue.extend({
       currentPage: 1,
       // 総ページ数
       totalPages: 0,
-      data: [],
+      posts: [],
     };
   },
   async asyncData() {
     const response = await $axios.get(`${process.env.baseUrl}/api/v1/posts`);
     return {
-      data: response.data.posts,
+      posts: response.data.posts,
       totalPages: response.data.total_pages,
     };
   },
@@ -73,7 +73,7 @@ export default Vue.extend({
         `${process.env.baseUrl}/api/v1/posts?page=${this.currentPage}`
       );
 
-      this.data = response.data.posts;
+      this.posts = response.data.posts;
       this.totalPages = response.data.total_pages;
     },
   },

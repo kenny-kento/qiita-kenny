@@ -9,9 +9,9 @@
         }}
       </p>
     </div>
-    <div v-if="data.length" class="search_result">
+    <div v-if="posts.length" class="search_result">
       <div
-        v-for="post in data"
+        v-for="post in posts"
         :key="post.id"
         class="serch_result_content flex"
       >
@@ -57,13 +57,13 @@ export default {
         }
       );
       return {
-        data: response.data.posts,
+        posts: response.data.posts,
         keyword: keyword,
         totalPages: response.data.total_pages,
       };
     } catch (error) {
       console.error("APIリクエストでエラーが発生しました:", error);
-      return { data: [] };
+      return { posts: [] };
     }
   },
   watchQuery: ["q"],
@@ -87,13 +87,13 @@ export default {
           },
         }
       );
-      this.data = response.data.posts;
+      this.posts = response.data.posts;
       this.totalPages = response.data.total_pages;
     },
   },
   data() {
     return {
-      data: [],
+      posts: [],
       keyword: "",
       // 現在のページ番号
       currentPage: 1,
