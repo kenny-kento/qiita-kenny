@@ -19,6 +19,11 @@
       </nuxt-link>
       <p class="post_date">{{ i.formatted_created_at }}</p>
     </div>
+    <v-pagination
+      v-model="currentPage"
+      :length="totalPages"
+      @input="fetchData"
+    ></v-pagination>
   </div>
   <div v-else class="mypost_wrapper">
     <p>投稿がありません</p>
@@ -29,6 +34,10 @@ export default {
   data() {
     return {
       posts: [],
+      // 現在のページ番号
+      currentPage: 1,
+      // 総ページ数
+      totalPages: 0,
     };
   },
   mounted() {
@@ -37,8 +46,12 @@ export default {
   methods: {
     async fetchData() {
       try {
-        const response = await this.$axios.get("api/v1/posts/own_posts");
-        this.posts = response.data;
+        const response = await this.$axios.get(
+          `api/v1/posts/own_posts?page=${this.currentPage}`
+        );
+        this.posts = response.data.posts;
+        this.totalPages = response.data.total_pages;
+        console.log(this.posts);
       } catch (e) {
         console.log(e);
       }

@@ -37,6 +37,11 @@
           </p>
         </div>
       </div>
+      <v-pagination
+        v-model="currentPage"
+        :length="totalPages"
+        @input="changePage"
+      ></v-pagination>
     </div>
   </div>
 </template>
@@ -46,11 +51,31 @@ import Vue from "vue";
 import $axios from "axios";
 
 export default Vue.extend({
+  data() {
+    return {
+      // 現在のページ番号
+      currentPage: 1,
+      // 総ページ数
+      totalPages: 0,
+      data: [],
+    };
+  },
   async asyncData() {
     const response = await $axios.get(`${process.env.baseUrl}/api/v1/posts`);
     return {
-      data: response.data,
+      data: response.data.posts,
+      totalPages: response.data.total_pages,
     };
+  },
+  methods: {
+    async changePage() {
+      const response = await $axios.get(
+        `${process.env.baseUrl}/api/v1/posts?page=${this.currentPage}`
+      );
+
+      this.data = response.data.posts;
+      this.totalPages = response.data.total_pages;
+    },
   },
 });
 </script>

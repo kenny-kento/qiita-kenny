@@ -31,6 +31,11 @@
           <p>いいね数</p>
         </div>
       </div>
+      <v-pagination
+        v-model="currentPage"
+        :length="totalPages"
+        @input="changePage"
+      ></v-pagination>
     </div>
     <div v-else class="search_result">
       <p>検索キーワードを含む記事がヒットしませんでした</p>
@@ -52,8 +57,9 @@ export default {
         }
       );
       return {
-        data: response.data,
+        data: response.data.posts,
         keyword: keyword,
+        totalPages: response.data.total_pages,
       };
     } catch (error) {
       console.error("APIリクエストでエラーが発生しました:", error);
@@ -71,11 +77,28 @@ export default {
       const regex = new RegExp(`(${escapedKeyword})`, "gi");
       return title.replace(regex, '<span class="highlight">$1</span>');
     },
+    async changePage() {
+      const response = await this.$axios.get(
+        `${process.env.baseUrl}/api/v1/posts/search`,
+        {
+          params: {
+            keyword: this.keyword,
+            page: this.currentPage,
+          },
+        }
+      );
+      this.data = response.data.posts;
+      this.totalPages = response.data.total_pages;
+    },
   },
   data() {
     return {
       data: [],
       keyword: "",
+      // 現在のページ番号
+      currentPage: 1,
+      // 総ページ数
+      totalPages: 0,
     };
   },
 };
