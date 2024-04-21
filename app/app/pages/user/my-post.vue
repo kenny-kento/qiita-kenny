@@ -34,9 +34,7 @@ export default {
   data() {
     return {
       posts: [],
-      // 現在のページ番号
       currentPage: 1,
-      // 総ページ数
       totalPages: 0,
     };
   },
@@ -51,7 +49,6 @@ export default {
         );
         this.posts = response.data.posts;
         this.totalPages = response.data.total_pages;
-        console.log(this.posts);
       } catch (e) {
         console.log(e);
       }

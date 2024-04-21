@@ -95,9 +95,7 @@ export default {
     return {
       posts: [],
       keyword: "",
-      // 現在のページ番号
       currentPage: 1,
-      // 総ページ数
       totalPages: 0,
     };
   },

@@ -53,9 +53,7 @@ import $axios from "axios";
 export default Vue.extend({
   data() {
     return {
-      // 現在のページ番号
       currentPage: 1,
-      // 総ページ数
       totalPages: 0,
       posts: [],
     };
