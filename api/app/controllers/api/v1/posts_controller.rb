@@ -8,7 +8,7 @@ class Api::V1::PostsController < ApplicationController
             post_data = post.as_json(
               include: {
                 user: { only: [:id, :name, :image] },
-                tags: { only: [:tag_name] } 
+                tags: { only: [:id, :tag_name] } 
               },
               methods: :formatted_created_at
             )
@@ -48,7 +48,7 @@ class Api::V1::PostsController < ApplicationController
 
         render json: @post.as_json(
             methods: [:formatted_created_at, :formatted_updated_at],
-            include: { tags: { only: [:tag_name] } }
+            include: { tags: { only: [:id, :tag_name] } }
         ).merge(
             is_current_user_post_owner: is_current_user_post_owner,
             is_liked: is_liked
@@ -82,7 +82,7 @@ class Api::V1::PostsController < ApplicationController
             render json: {
                 posts: current_user_posts.as_json(
                     methods: [:formatted_created_at, :formatted_updated_at],
-                    include: { tags: { only: [:tag_name] } }
+                    include: { tags: { only: [:id, :tag_name] } }
                     ),
                 total_pages: current_user_posts.total_pages
             }
@@ -115,10 +115,41 @@ class Api::V1::PostsController < ApplicationController
             render json: {
                 posts: user_liked_posts.as_json(
                     methods: [:formatted_created_at, :formatted_updated_at],
-                    include: { tags: { only: [:tag_name] } }
+                    include: { tags: { only: [:id, :tag_name] } }
                     ),
                 total_pages: user_liked_posts.total_pages
             }
+        else
+            render json: []
+        end
+    end
+
+    def list_posts_by_tag
+        tag_data = Tag.where(id: params[:id])
+        tag_related_posts = Post.joins(:tags).where(tags: {id: params[:id]}).page(page_number).includes(:likes, :user)
+
+        if tag_related_posts.any?
+
+            #HACK:ユーザーアイコンを含む投稿情報の返却の処理は共通化してメソッドとして切り出したい。
+            posts_data = tag_related_posts.map do |post|
+                post_data = post.as_json(
+                  include: {
+                    user: { only: [:id, :name, :image] },
+                    tags: { only: [:id, :tag_name] } 
+                  },
+                  methods: :formatted_created_at
+                )
+                # ユーザーのアイコンURLを取得してpost_dataに含める
+                append_user_icon_url(post, post_data)
+                post_data[:likes_count] = post.likes.size
+                post_data
+            end
+            render json: {
+                tag: tag_data,
+                posts: posts_data,       
+                total_pages: tag_related_posts.total_pages,
+                total_count: tag_related_posts.size
+              }    
         else
             render json: []
         end
@@ -184,4 +215,6 @@ class Api::V1::PostsController < ApplicationController
         page_number = params[:page] || 1
     end
 
+    def posts_with_user_icon
+    end
 end

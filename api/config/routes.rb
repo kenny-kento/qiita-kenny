@@ -35,6 +35,7 @@
 #                  api_auth_validate_token GET    /api/auth/validate_token(.:format)                                                                devise_token_auth/token_validations#validate_token
 #                   own_posts_api_v1_posts GET    /api/v1/posts/own_posts(.:format)                                                                 api/v1/posts#own_posts
 #                 liked_posts_api_v1_posts GET    /api/v1/posts/liked_posts(.:format)                                                               api/v1/posts#liked_posts
+#            list_posts_by_tag_api_v1_post GET    /api/v1/posts/:id/list_posts_by_tag(.:format)                                                     api/v1/posts#list_posts_by_tag
 #                      search_api_v1_posts GET    /api/v1/posts/search(.:format)                                                                    api/v1/posts#search
 #                             api_v1_posts GET    /api/v1/posts(.:format)                                                                           api/v1/posts#index
 #                                          POST   /api/v1/posts(.:format)                                                                           api/v1/posts#create
@@ -82,6 +83,7 @@ Rails.application.routes.draw do
         get 'own_posts', on: :collection
         get 'liked_posts', on: :collection     
         get 'search', on: :collection
+        get 'list_posts_by_tag', on: :member
       end
       resources :users, only: [:update] do
         get 'show_current_user', on: :collection     

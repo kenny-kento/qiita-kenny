@@ -5,7 +5,7 @@
         <p>
           <span v-for="(t, index) in i.tags" :key="index">
             <font-awesome-icon :icon="['fas', 'tag']" />
-            {{ t.tag_name }}
+            <nuxt-link :to="`/tag/${t.id}`">{{ t.tag_name }}</nuxt-link>
           </span>
         </p>
       </template>

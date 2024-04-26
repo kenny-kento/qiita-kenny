@@ -1,8 +1,14 @@
 <template>
   <div class="home_wrapper">
     <div class="left">
-      <p>ユーザーランキング</p>
-      <div class="user_lanking">ここにリストが表示される</div>
+      <div class="tag_box">
+        <h1>{{ tag.tag_name }}</h1>
+        <div class="tag_post_count">
+          <p>{{ total_count }}</p>
+          <p>記事</p>
+        </div>
+      </div>
+      <div class="user_lanking">ユーザーランキング</div>
     </div>
     <div class="right">
       <div v-for="(i, index) in posts" :key="index" class="content_box flex">
@@ -47,85 +53,51 @@
 </template>
 
 <script>
-import Vue from "vue";
-import $axios from "axios";
-
-export default Vue.extend({
+export default {
   data() {
     return {
       currentPage: 1,
       totalPages: 0,
+      total_count: 0,
+      tag: [],
       posts: [],
     };
   },
-  async asyncData() {
-    const response = await $axios.get(`${process.env.baseUrl}/api/v1/posts`);
+  async asyncData({ params, $axios }) {
+    console.log(params);
+    const id = params.tagid;
+    console.log(id);
+    const response = await $axios.get(
+      `${process.env.baseUrl}/api/v1/posts/${id}/list_posts_by_tag`
+    );
+    console.log(response);
     return {
       posts: response.data.posts,
+      tag: response.data.tag[0],
+      total_count: response.data.total_count,
       totalPages: response.data.total_pages,
     };
   },
-  methods: {
-    async changePage() {
-      const response = await $axios.get(
-        `${process.env.baseUrl}/api/v1/posts?page=${this.currentPage}`
-      );
-
-      this.posts = response.data.posts;
-      this.totalPages = response.data.total_pages;
-    },
-  },
-});
+};
 </script>
 
 <style>
-.home_wrapper {
-  display: flex;
-  height: auto;
-  padding: 15px;
-}
-
-.flex {
-  display: flex;
-}
-
-.left {
-  flex: 1;
-}
-
-.right {
-  flex: 1.5;
-}
-
-.content_left {
-  margin: 0 15px;
-}
-
-.content_box {
+.tag_box {
+  background-color: #fff;
   border-radius: 10px;
-  background-color: #ffffff;
-  margin-bottom: 5px;
-  padding: 5px 8px;
-}
-
-.user_lanking {
-  border: 1px solid black;
   width: 80%;
   margin: 0 auto;
-  height: 60vh;
   text-align: center;
+  margin-bottom: 30px;
 }
 
-.content_right p {
-  margin: 0;
+.tag_box > h1 {
+  border-bottom: 1px solid #828282;
+  font-size: 1.5rem;
+  padding: 10px 0;
 }
 
-.post_date {
-  color: #9b9999;
-}
-
-.post_title {
-  font-size: 1.3rem;
-  font-weight: 400;
+.tag_post_count {
+  font-size: 1.1rem;
 }
 </style>
