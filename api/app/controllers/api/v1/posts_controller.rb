@@ -3,24 +3,9 @@ class Api::V1::PostsController < ApplicationController
     
     def index
         posts = Post.page(page_number).includes(:user, :tags, :likes)
+        response = response_posts_data(posts, posts.total_pages, need_user_data: true)
 
-        posts_data = posts.map do |post|
-            post_data = post.as_json(
-              include: {
-                user: { only: [:id, :name, :image] },
-                tags: { only: [:id, :tag_name] } 
-              },
-              methods: :formatted_created_at
-            )
-            # ユーザーのアイコンURLを取得してpost_dataに含める
-            append_user_icon_url(post, post_data)
-            post_data[:likes_count] = post.likes.size
-            post_data
-        end
-        render json: {
-            posts: posts_data,       
-            total_pages: posts.total_pages
-          }
+        render json: response
     end
 
     def create
@@ -79,13 +64,9 @@ class Api::V1::PostsController < ApplicationController
         current_user_posts = current_user&.posts.page(page_number).includes(:tags)
 
         if current_user_posts&.any?
-            render json: {
-                posts: current_user_posts.as_json(
-                    methods: [:formatted_created_at, :formatted_updated_at],
-                    include: { tags: { only: [:id, :tag_name] } }
-                    ),
-                total_pages: current_user_posts.total_pages
-            }
+            response = response_posts_data(current_user_posts, current_user_posts.total_pages)
+
+            render json: response
         else
             render json: []
         end
@@ -100,25 +81,17 @@ class Api::V1::PostsController < ApplicationController
                          end
         
         searched_posts = searched_posts.page(page_number).includes(:user)
-        render json: {
-            posts:  searched_posts.as_json(
-                include: { user: { only: [:id, :name, :image] } },
-                methods: :formatted_created_at
-                ),
-            total_pages: searched_posts.total_pages
-        }
+        response = response_posts_data(searched_posts, searched_posts.total_pages, need_user_data: true)
+
+        render json: response
     end
 
     def liked_posts
         user_liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id }).page(page_number).includes(:tags)
         if user_liked_posts.any?
-            render json: {
-                posts: user_liked_posts.as_json(
-                    methods: [:formatted_created_at, :formatted_updated_at],
-                    include: { tags: { only: [:id, :tag_name] } }
-                    ),
-                total_pages: user_liked_posts.total_pages
-            }
+            response = response_posts_data(user_liked_posts, user_liked_posts.total_pages)
+
+            render json: response
         else
             render json: []
         end
@@ -129,27 +102,11 @@ class Api::V1::PostsController < ApplicationController
         tag_related_posts = Post.joins(:tags).where(tags: {id: params[:id]}).page(page_number).includes(:likes, :user)
 
         if tag_related_posts.any?
+            response = response_posts_data(tag_related_posts, tag_related_posts.total_pages, tag_related_posts.size, need_user_data: true)
+            #　NOTE:タグの情報も必要なのでresponseに追加する。
+            response[:tag] = tag_data
 
-            #HACK:ユーザーアイコンを含む投稿情報の返却の処理は共通化してメソッドとして切り出したい。
-            posts_data = tag_related_posts.map do |post|
-                post_data = post.as_json(
-                  include: {
-                    user: { only: [:id, :name, :image] },
-                    tags: { only: [:id, :tag_name] } 
-                  },
-                  methods: :formatted_created_at
-                )
-                # ユーザーのアイコンURLを取得してpost_dataに含める
-                append_user_icon_url(post, post_data)
-                post_data[:likes_count] = post.likes.size
-                post_data
-            end
-            render json: {
-                tag: tag_data,
-                posts: posts_data,       
-                total_pages: tag_related_posts.total_pages,
-                total_count: tag_related_posts.size
-              }    
+            render json: response
         else
             render json: []
         end
@@ -215,6 +172,26 @@ class Api::V1::PostsController < ApplicationController
         page_number = params[:page] || 1
     end
 
-    def posts_with_user_icon
+    #HACK:共通したrenderの処理を書く
+    def response_posts_data(posts, total_pages = nil, total_count = nil, need_user_data: false)
+        posts_data = posts.map do |post|
+            post_data = post.as_json(
+              include: {
+                user: { only: [:id, :name, :image] },
+                tags: { only: [:id, :tag_name] } 
+              },
+              methods: :formatted_created_at
+            )
+            # ユーザーのアイコンURLを取得してpost_dataに含める
+            append_user_icon_url(post, post_data) if need_user_data
+            post_data[:likes_count] = post.likes.size
+            post_data
+        end
+
+        response = { posts: posts_data }
+        response[:total_pages] = total_pages if total_pages
+        response[:total_count] = total_count if total_count
+
+        response
     end
 end

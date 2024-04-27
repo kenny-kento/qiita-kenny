@@ -16,7 +16,11 @@
         class="serch_result_content flex"
       >
         <div class="content_left">
-          <p class="circle">写真</p>
+          <img
+            :src="post.user.icon_url ? post.user.icon_url : '/user_default.png'"
+            alt="写真"
+            class="circle"
+          />
         </div>
         <div class="content_right">
           <p class="post_user_name">@{{ post.user.name }}</p>
@@ -27,8 +31,20 @@
               v-html="highlightKeyword(post.title, keyword)"
             ></h3>
           </nuxt-link>
-          <p><font-awesome-icon :icon="['fas', 'tag']" />タグ</p>
-          <p>いいね数</p>
+          <template v-if="post.tags.length">
+            <p>
+              <span v-for="(t, index) in post.tags" :key="index">
+                <font-awesome-icon :icon="['fas', 'tag']" />
+                <nuxt-link :to="`/tag/${t.id}`">{{ t.tag_name }}</nuxt-link>
+              </span>
+            </p>
+          </template>
+          <template v-else>
+            <p><font-awesome-icon :icon="['fas', 'tag']" />タグなし</p>
+          </template>
+          <p>
+            <font-awesome-icon :icon="['fas', 'heart']" />{{ post.likes_count }}
+          </p>
         </div>
       </div>
       <v-pagination
