@@ -5,43 +5,12 @@
       <div class="user_lanking">ここにリストが表示される</div>
     </div>
     <div class="right">
-      <div v-for="(i, index) in posts" :key="index" class="content_box flex">
-        <div class="content_left">
-          <img
-            :src="i.user.icon_url ? i.user.icon_url : '/user_default.png'"
-            alt="写真"
-            class="circle"
-          />
-        </div>
-        <div class="content_right">
-          <p class="post_user_name">@{{ i.user.name }}</p>
-          <time class="post_date">{{ i.formatted_created_at }}</time>
-          <nuxt-link :to="`/post/${i.id}`">
-            <h3 class="post_title">
-              {{ i.title }}
-            </h3>
-          </nuxt-link>
-          <template v-if="i.tags.length">
-            <p>
-              <span v-for="(t, index) in i.tags" :key="index">
-                <font-awesome-icon :icon="['fas', 'tag']" />
-                <nuxt-link :to="`/tag/${t.id}`">{{ t.tag_name }}</nuxt-link>
-              </span>
-            </p>
-          </template>
-          <template v-else>
-            <p><font-awesome-icon :icon="['fas', 'tag']" />タグなし</p>
-          </template>
-          <p>
-            <font-awesome-icon :icon="['fas', 'heart']" />{{ i.likes_count }}
-          </p>
-        </div>
-      </div>
-      <v-pagination
-        v-model="currentPage"
-        :length="totalPages"
-        @input="changePage"
-      ></v-pagination>
+      <PostList
+        :posts="posts"
+        :totalPages="totalPages"
+        :currentPage="currentPage"
+        @page-changed="changePage"
+      />
     </div>
   </div>
 </template>
@@ -66,13 +35,14 @@ export default Vue.extend({
     };
   },
   methods: {
-    async changePage() {
+    async changePage(page) {
       const response = await $axios.get(
-        `${process.env.baseUrl}/api/v1/posts?page=${this.currentPage}`
+        `${process.env.baseUrl}/api/v1/posts?page=${page}`
       );
 
       this.posts = response.data.posts;
       this.totalPages = response.data.total_pages;
+      this.currentPage = page;
     },
   },
 });
@@ -85,10 +55,6 @@ export default Vue.extend({
   padding: 15px;
 }
 
-.flex {
-  display: flex;
-}
-
 .left {
   flex: 1;
 }
@@ -97,35 +63,11 @@ export default Vue.extend({
   flex: 1.5;
 }
 
-.content_left {
-  margin: 0 15px;
-}
-
-.content_box {
-  border-radius: 10px;
-  background-color: #ffffff;
-  margin-bottom: 5px;
-  padding: 5px 8px;
-}
-
 .user_lanking {
   border: 1px solid black;
   width: 80%;
   margin: 0 auto;
   height: 60vh;
   text-align: center;
-}
-
-.content_right p {
-  margin: 0;
-}
-
-.post_date {
-  color: #9b9999;
-}
-
-.post_title {
-  font-size: 1.3rem;
-  font-weight: 400;
 }
 </style>

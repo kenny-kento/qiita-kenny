@@ -98,11 +98,11 @@ class Api::V1::PostsController < ApplicationController
     end
 
     def list_posts_by_tag
-        tag_data = Tag.where(id: params[:id])
+        tag_data = Tag.find_by(id: params[:id]) 
         tag_related_posts = Post.joins(:tags).where(tags: {id: params[:id]}).page(page_number).includes(:likes, :user)
 
         if tag_related_posts.any?
-            response = response_posts_data(tag_related_posts, tag_related_posts.total_pages, tag_related_posts.size, need_user_data: true)
+            response = response_posts_data(tag_related_posts, tag_related_posts.total_pages, tag_related_posts.total_count, need_user_data: true)
             #　NOTE:タグの情報も必要なのでresponseに追加する。
             response[:tag] = tag_data
 

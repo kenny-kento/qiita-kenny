@@ -11,43 +11,12 @@
       <div class="user_lanking">ユーザーランキング</div>
     </div>
     <div class="right">
-      <div v-for="(i, index) in posts" :key="index" class="content_box flex">
-        <div class="content_left">
-          <img
-            :src="i.user.icon_url ? i.user.icon_url : '/user_default.png'"
-            alt="写真"
-            class="circle"
-          />
-        </div>
-        <div class="content_right">
-          <p class="post_user_name">@{{ i.user.name }}</p>
-          <time class="post_date">{{ i.formatted_created_at }}</time>
-          <nuxt-link :to="`/post/${i.id}`">
-            <h3 class="post_title">
-              {{ i.title }}
-            </h3>
-          </nuxt-link>
-          <template v-if="i.tags.length">
-            <p>
-              <span v-for="(t, index) in i.tags" :key="index">
-                <font-awesome-icon :icon="['fas', 'tag']" />
-                <nuxt-link :to="`/tag/${t.id}`">{{ t.tag_name }}</nuxt-link>
-              </span>
-            </p>
-          </template>
-          <template v-else>
-            <p><font-awesome-icon :icon="['fas', 'tag']" />タグなし</p>
-          </template>
-          <p>
-            <font-awesome-icon :icon="['fas', 'heart']" />{{ i.likes_count }}
-          </p>
-        </div>
-      </div>
-      <v-pagination
-        v-model="currentPage"
-        :length="totalPages"
-        @input="changePage"
-      ></v-pagination>
+      <PostList
+        :posts="posts"
+        :totalPages="totalPages"
+        :currentPage="currentPage"
+        @page-changed="changePage"
+      />
     </div>
   </div>
 </template>
@@ -56,6 +25,7 @@
 export default {
   data() {
     return {
+      id: null,
       currentPage: 1,
       totalPages: 0,
       total_count: 0,
@@ -64,19 +34,33 @@ export default {
     };
   },
   async asyncData({ params, $axios }) {
-    console.log(params);
     const id = params.tagid;
-    console.log(id);
     const response = await $axios.get(
       `${process.env.baseUrl}/api/v1/posts/${id}/list_posts_by_tag`
     );
-    console.log(response);
     return {
+      id: id,
       posts: response.data.posts,
-      tag: response.data.tag[0],
+      tag: response.data.tag,
       total_count: response.data.total_count,
       totalPages: response.data.total_pages,
     };
+  },
+  methods: {
+    async changePage(page) {
+      const response = await this.$axios.get(
+        `${process.env.baseUrl}/api/v1/posts/${this.id}/list_posts_by_tag`,
+        {
+          params: {
+            page: page,
+          },
+        }
+      );
+      this.posts = response.data.posts;
+      this.tag = response.data.tag;
+      this.totalPages = response.data.total_pages;
+      this.currentPage = page;
+    },
   },
 };
 </script>
