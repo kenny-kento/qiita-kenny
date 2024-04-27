@@ -3,9 +3,8 @@ class Api::V1::PostsController < ApplicationController
     
     def index
         posts = Post.page(page_number).includes(:user, :tags, :likes)
-        response = response_posts_data(posts, posts.total_pages, need_user_data: true)
 
-        render json: response
+        render json: response_posts_data(posts, posts.total_pages, need_user_data: true)
     end
 
     def create
@@ -64,9 +63,7 @@ class Api::V1::PostsController < ApplicationController
         current_user_posts = current_user&.posts.page(page_number).includes(:tags)
 
         if current_user_posts&.any?
-            response = response_posts_data(current_user_posts, current_user_posts.total_pages)
-
-            render json: response
+            render json: response_posts_data(current_user_posts, current_user_posts.total_pages)
         else
             render json: []
         end
@@ -79,19 +76,15 @@ class Api::V1::PostsController < ApplicationController
                          else  
                             Post.all
                          end
-        
         searched_posts = searched_posts.page(page_number).includes(:user)
-        response = response_posts_data(searched_posts, searched_posts.total_pages, need_user_data: true)
 
-        render json: response
+        render json: response_posts_data(searched_posts, searched_posts.total_pages, need_user_data: true)
     end
 
     def liked_posts
         user_liked_posts = Post.joins(:likes).where(likes: { user_id: current_user&.id }).page(page_number).includes(:tags)
         if user_liked_posts.any?
-            response = response_posts_data(user_liked_posts, user_liked_posts.total_pages)
-
-            render json: response
+            render json: response_posts_data(user_liked_posts, user_liked_posts.total_pages)
         else
             render json: []
         end
@@ -169,7 +162,7 @@ class Api::V1::PostsController < ApplicationController
 
     def page_number
         #NOTE:ページネーション判定に必要なpage番号の確認を行う。
-        page_number = params[:page] || 1
+        page_number = params[:page].to_i || 1
     end
 
     #HACK:共通したrenderの処理を書く
