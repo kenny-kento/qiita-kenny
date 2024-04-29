@@ -33,7 +33,7 @@
           </nuxt-link>
           <template v-if="post.tags.length">
             <p>
-              <span v-for="(t, index) in post.tags" :key="index">
+              <span v-for="t in post.tags" :key="t.id">
                 <font-awesome-icon :icon="['fas', 'tag']" />
                 <nuxt-link :to="`/tag/${t.id}`">{{ t.tag_name }}</nuxt-link>
               </span>

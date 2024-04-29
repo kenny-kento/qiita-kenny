@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-for="(post, index) in posts" :key="index" class="content_box flex">
+    <div v-for="post in posts" :key="post.id" class="content_box flex">
       <div class="content_left">
         <img
           :src="post.user.icon_url ? post.user.icon_url : '/user_default.png'"
@@ -18,7 +18,7 @@
         </nuxt-link>
         <template v-if="post.tags.length">
           <p>
-            <span v-for="(t, index) in post.tags" :key="index">
+            <span v-for="t in post.tags" :key="t.id">
               <font-awesome-icon :icon="['fas', 'tag']" />
               <nuxt-link :to="`/tag/${t.id}`">{{ t.tag_name }}</nuxt-link>
             </span>
@@ -40,7 +40,7 @@
   </div>
 </template>
 
-<script>
+<script scoped>
 export default {
   props: {
     posts: Array,
