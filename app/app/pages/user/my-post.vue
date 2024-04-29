@@ -1,23 +1,23 @@
 <template>
   <div v-if="posts.length" class="mypost_wrapper">
-    <div v-for="(i, index) in posts" :key="index" class="content_box1">
-      <template v-if="i.tags.length">
+    <div v-for="post in posts" :key="post.id" class="content_box1">
+      <template v-if="post.tags.length">
         <p>
-          <span v-for="(t, index) in i.tags" :key="index">
+          <span v-for="t in post.tags" :key="t.id">
             <font-awesome-icon :icon="['fas', 'tag']" />
-            {{ t.tag_name }}
+            <nuxt-link :to="`/tag/${t.id}`">{{ t.tag_name }}</nuxt-link>
           </span>
         </p>
       </template>
       <template v-else>
         <p><font-awesome-icon :icon="['fas', 'tag']" />タグなし</p>
       </template>
-      <nuxt-link :to="`/post/${i.id}`">
+      <nuxt-link :to="`/post/${post.id}`">
         <h3 class="post_title">
-          {{ i.title }}
+          {{ post.title }}
         </h3>
       </nuxt-link>
-      <p class="post_date">{{ i.formatted_created_at }}</p>
+      <p class="post_date">{{ post.formatted_created_at }}</p>
     </div>
     <v-pagination
       v-model="currentPage"

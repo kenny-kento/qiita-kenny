@@ -49,7 +49,7 @@
       <h1>{{ post.title }}</h1>
       <template v-if="post.tags.length">
         <p>
-          <span v-for="(t, index) in post.tags" :key="index">
+          <span v-for="t in post.tags" :key="t.id">
             <font-awesome-icon :icon="['fas', 'tag']" />
             {{ t.tag_name + "," }}
           </span>
