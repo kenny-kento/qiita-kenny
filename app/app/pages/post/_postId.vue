@@ -1,5 +1,7 @@
 <template>
   <div class="post_content_wrapper">
+    <!-- NOTE: 子コンポーネントからthis.dialogの更新通知を受け取るため -->
+    <AuthModal :dialog.sync="dialog" />
     <div class="wrapper_left">
       <ul>
         <li>
@@ -67,11 +69,15 @@
 </template>
 
 <script>
+import AuthModal from "../../components/auth-modal.vue";
+
 export default {
+  components: { AuthModal },
   data() {
     return {
       post: [],
       is_liked: false,
+      dialog: false,
     };
   },
   async asyncData({ params, $axios }) {
@@ -86,10 +92,15 @@ export default {
   },
   methods: {
     handleLike() {
-      if (this.is_liked) {
-        this.removeLike(this.post.id);
+      console.log(this.dialog);
+      if (!this.$auth.loggedIn) {
+        this.dialog = true;
       } else {
-        this.addLike();
+        if (this.is_liked) {
+          this.removeLike(this.post.id);
+        } else {
+          this.addLike();
+        }
       }
     },
     //TODO:未ログイン状態でいいねを押すとログインがポップアップで求められるように調整が必要。
