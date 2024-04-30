@@ -1,5 +1,6 @@
 <template>
   <header>
+    <flashMessage />
     <nuxt-link to="/">
       <p class="header_container">Qiita</p>
     </nuxt-link>

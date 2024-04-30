@@ -2,6 +2,7 @@
   <header>
     <div class="contents">
       <div class="header_left">
+        <flashMessage />
         <nuxt-link to="/">
           <p class="header_container">Qiita</p>
         </nuxt-link>
@@ -50,9 +51,10 @@
             </v-menu>
           </li>
           <li>
-            <nuxt-link to="/post">
-              <button class="post_page">投稿する</button>
-            </nuxt-link>
+            <!-- <nuxt-link to="/post"> -->
+            <button class="post_page" @click="move_to_post">投稿する</button>
+            <!-- </nuxt-link> -->
+            <!-- <v-btn class="post_page">投稿する</v-btn> -->
           </li>
         </ul>
       </div>
@@ -86,10 +88,35 @@ export default {
 
         this.$store.dispatch("user/clearUser");
         this.$router.push("/");
+        this.$store.dispatch(
+          "flashMessage/showMessage",
+          {
+            message: "ログアウトしました.",
+            type: "success",
+            status: true,
+          },
+          { root: true }
+        );
       });
     },
     searchArticles() {
       this.$router.push({ path: "/search", query: { q: this.keyword } });
+    },
+    move_to_post() {
+      if (this.$auth.loggedIn) {
+        this.$router.push("/post");
+      } else {
+        this.$router.push("/login");
+        this.$store.dispatch(
+          "flashMessage/showMessage",
+          {
+            message: "ログインしてください",
+            type: "error",
+            status: true,
+          },
+          { root: true }
+        );
+      }
     },
   },
 };
