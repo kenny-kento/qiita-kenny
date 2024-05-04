@@ -5,6 +5,7 @@
         ログインして続ける
       </v-card-title>
       <v-card-text> メールアドレスでログイン・新規登録 </v-card-text>
+      <!-- TODO: vuetifyの2.0以降はv-layoutが非推奨ということがありレイアウト修正時にv-row利用して対応する -->
       <v-layout column align-center>
         <v-btn
           class="btn_auth_box"

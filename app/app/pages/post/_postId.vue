@@ -69,10 +69,7 @@
 </template>
 
 <script>
-import AuthModal from "../../components/auth-modal.vue";
-
 export default {
-  components: { AuthModal },
   data() {
     return {
       post: [],

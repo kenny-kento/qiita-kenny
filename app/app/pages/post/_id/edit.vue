@@ -48,12 +48,7 @@
 </template>
 
 <script>
-import ConfirmModal from "~/components/confirm-modal.vue";
-
 export default {
-  components: {
-    ConfirmModal,
-  },
   data: function () {
     return {
       title: "",

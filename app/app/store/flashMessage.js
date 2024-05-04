@@ -15,7 +15,6 @@ export const mutations = {
     state.message = message;
   },
   setType(state, type) {
-    console.log(type);
     state.type = type;
   },
   setStatus(state, bool) {
