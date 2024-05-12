@@ -1,5 +1,6 @@
 <template>
   <div class="post_content_wrapper">
+    <FlashMessage />
     <!-- NOTE: 子コンポーネントからthis.dialogの更新通知を受け取るため -->
     <AuthModal :dialog.sync="dialog" />
     <div class="wrapper_left">
@@ -69,6 +70,8 @@
 </template>
 
 <script>
+import FlashMessage from "~/components/FlashMessage.vue";
+
 export default {
   data() {
     return {
