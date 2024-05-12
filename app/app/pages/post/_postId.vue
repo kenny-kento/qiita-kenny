@@ -89,7 +89,6 @@ export default {
   },
   methods: {
     handleLike() {
-      console.log(this.dialog);
       if (!this.$auth.loggedIn) {
         this.dialog = true;
       } else {

@@ -97,15 +97,11 @@ export default {
 
         this.$store.dispatch("user/clearUser");
         this.$router.push("/");
-        this.$store.dispatch(
-          "flashMessage/showMessage",
-          {
-            message: "ログアウトしました.",
-            type: "success",
-            status: true,
-          },
-          { root: true }
-        );
+        this.$store.dispatch("flashMessage/showMessage", {
+          message: "ログアウトしました.",
+          type: "success",
+          status: true,
+        });
       });
     },
     searchArticles() {

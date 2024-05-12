@@ -24,7 +24,6 @@ export const mutations = {
 
 export const actions = {
   showMessage({ commit }, { message, type, status }) {
-    console.log("setType", type);
     commit("setMessage", message);
     commit("setType", type);
     commit("setStatus", status);
