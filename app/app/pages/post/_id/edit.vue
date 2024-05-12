@@ -48,12 +48,7 @@
 </template>
 
 <script>
-import ConfirmModal from "~/components/confirm-modal.vue";
-
 export default {
-  components: {
-    ConfirmModal,
-  },
   data: function () {
     return {
       title: "",
@@ -118,6 +113,11 @@ export default {
           },
         });
         this.$router.push(`/post/${id}`);
+        this.$store.dispatch("flashMessage/showMessage", {
+          message: "記事を更新しました",
+          type: "success",
+          status: true,
+        });
       } catch (e) {
         console.log(e);
       }

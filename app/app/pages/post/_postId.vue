@@ -1,5 +1,8 @@
 <template>
   <div class="post_content_wrapper">
+    <FlashMessage />
+    <!-- NOTE: 子コンポーネントからthis.dialogの更新通知を受け取るため -->
+    <AuthModal :dialog.sync="dialog" />
     <div class="wrapper_left">
       <ul>
         <li>
@@ -67,11 +70,14 @@
 </template>
 
 <script>
+import FlashMessage from "~/components/FlashMessage.vue";
+
 export default {
   data() {
     return {
       post: [],
       is_liked: false,
+      dialog: false,
     };
   },
   async asyncData({ params, $axios }) {
@@ -86,10 +92,14 @@ export default {
   },
   methods: {
     handleLike() {
-      if (this.is_liked) {
-        this.removeLike(this.post.id);
+      if (!this.$auth.loggedIn) {
+        this.dialog = true;
       } else {
-        this.addLike();
+        if (this.is_liked) {
+          this.removeLike(this.post.id);
+        } else {
+          this.addLike();
+        }
       }
     },
     //TODO:未ログイン状態でいいねを押すとログインがポップアップで求められるように調整が必要。

@@ -1,10 +1,12 @@
 <template>
   <div>
-    <Header />
-    <div class="wrapper">
-      <Nuxt />
-    </div>
-    <Footer />
+    <v-app>
+      <Header />
+      <div class="wrapper">
+        <Nuxt />
+      </div>
+      <Footer />
+    </v-app>
   </div>
 </template>
 

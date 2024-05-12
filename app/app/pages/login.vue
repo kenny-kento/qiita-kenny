@@ -72,6 +72,11 @@ export default {
           },
         });
         this.$router.push("/");
+        this.$store.dispatch("flashMessage/showMessage", {
+          message: "ログインしました.",
+          type: "success",
+          status: true,
+        });
       } catch (error) {
         this.error = error.response.data.errors;
       }
