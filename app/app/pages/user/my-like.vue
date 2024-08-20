@@ -48,7 +48,7 @@ export default {
         const response = await this.$axios.get(
           `api/v1/posts/liked_posts?page=${this.currentPage}`
         );
-        this.posts = response.data.posts;
+        this.posts = response.data.posts ? response.data.posts : [];
         this.totalPages = response.data.total_pages;
       } catch (e) {
         console.log(e);
