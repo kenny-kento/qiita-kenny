@@ -23,37 +23,43 @@ Qiita の模倣アプリです。
 git clone https://github.com/Kenty-725/qiita-kenny.git
 ```
 
-2. `docker-compose.yml`があるディレクトリで build する
+2. `app/app`ディレクトリ直下に env ファイルを作成し中身に下記を記載する
+
+```bash {iscopy=true}
+BASE_URL="http://localhost:3001"
+```
+
+3. `docker-compose.yml`があるディレクトリで build する
 
 ```bash {iscopy=true}
 docker-compose build
 ```
 
-3. db を作成する
+4. db を作成する
 
 ```bash {iscopy=true}
 docker-compose run --rm api db:create
 ```
 
-4. scheme をマイグレーションする
+5. scheme をマイグレーションする
 
 ```bash {iscopy=true}
 docker-compose run --rm api db:migrate
 ```
 
-5. seed データを投入する。
+6. seed データを投入する。
 
 ```bash {iscopy=true}
 docker-compose run --rm api db:seed
 ```
 
-6. アプリを起動させる
+7. アプリを起動させる
 
 ```bash {iscopy=true}
 docker-compose up -d
 ```
 
-7. `http://localhost:3000/`にアクセスする。
+8. `http://localhost:3000/`にアクセスする。
 
 ## 使用環境
 
