@@ -28,7 +28,10 @@
           <p><font-awesome-icon :icon="['fas', 'tag']" />タグなし</p>
         </template>
         <p>
-          <font-awesome-icon :icon="['fas', 'heart']" />{{ post.likes_count }}
+          <font-awesome-icon :icon="['fas', 'heart']" />
+          <nuxt-link :to="`/post/${post.id}/likers`">{{
+            post.likes_count
+          }}</nuxt-link>
         </p>
       </div>
     </div>
