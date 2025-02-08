@@ -1,4 +1,4 @@
-FROM ruby:3.0
+FROM ruby:3.0.6
 RUN apt-get update -qq && apt-get install -y nodejs
 WORKDIR /qiita-kenny
 COPY Gemfile /qiita-kenny/Gemfile
