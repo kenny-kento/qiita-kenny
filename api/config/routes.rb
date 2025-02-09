@@ -87,6 +87,7 @@ Rails.application.routes.draw do
       end
       resources :users, only: [:update] do
         get 'show_current_user', on: :collection     
+        get 'likers', on: :member
       end
       resources :likes, only: [:create, :destroy] do
       end
