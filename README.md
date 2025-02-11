@@ -23,37 +23,44 @@ Qiita の模倣アプリです。
 git clone https://github.com/Kenty-725/qiita-kenny.git
 ```
 
-2. `docker-compose.yml`があるディレクトリで build する
+2. frontend の依存関係をインストールする(node_module 作成)
+
+```bash {iscopy=true}
+cd qiita-kenny/app/app
+npm install
+```
+
+3. `docker-compose.yml`があるディレクトリで build する
 
 ```bash {iscopy=true}
 docker-compose build
 ```
 
-3. db を作成する
+4. db を作成する
 
 ```bash {iscopy=true}
-docker-compose run --rm api db:create
+docker-compose run --rm api rails db:create
 ```
 
-4. scheme をマイグレーションする
+5. scheme をマイグレーションする
 
 ```bash {iscopy=true}
-docker-compose run --rm api db:migrate
+docker-compose run --rm api rails db:migrate
 ```
 
-5. seed データを投入する。
+6. seed データを投入する。
 
 ```bash {iscopy=true}
-docker-compose run --rm api db:seed
+docker-compose run --rm api rails db:seed
 ```
 
-6. アプリを起動させる
+7. アプリを起動させる
 
 ```bash {iscopy=true}
 docker-compose up -d
 ```
 
-7. `http://localhost:3000/`にアクセスする。
+8. `http://localhost:3000/`にアクセスする。
 
 ## 使用環境
 
@@ -66,6 +73,8 @@ docker-compose up -d
   <img src="https://img.shields.io/badge/-Nuxt.js-00C58E.svg?logo=nuxt.js&style=for-the-badge">
   <!-- バックエンドのフレームワーク一覧 -->
   <img src="https://img.shields.io/badge/-Rails-CC0000.svg?logo=rails&style=for-the-badge">
+  <!-- UIのフレームワーク一覧 -->
+  <img src="https://img.shields.io/badge/-Vuetify-1867C0.svg?logo=vuetify&style=for-the-badge">
   <!-- バックエンドの言語一覧 -->
   <img src="https://img.shields.io/badge/-ruby-CC0000.svg?logo=rails&style=for-the-badge">
   <!-- ミドルウェア一覧 -->
